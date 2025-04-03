@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Copy, Check, Download, FileCode, Play } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
 import { toast } from "@/hooks/use-toast"
-import { highlightLuaCode } from "@/lib/syntax-highlighting"
+
 
 interface ScriptPreviewProps {
   script: string
@@ -18,9 +18,7 @@ export function ScriptPreview({ script }: ScriptPreviewProps) {
   const [highlightedScript, setHighlightedScript] = useState<string>(script)
 
   // Apply syntax highlighting when script changes
-  useEffect(() => {
-    setHighlightedScript(highlightLuaCode(script))
-  }, [script])
+
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(script)
