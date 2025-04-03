@@ -1,33 +1,32 @@
 import type React from "react"
 import "./globals.css"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
-import { ThemeProvider } from "@/components/theme-provider"
+import type {Metadata} from "next"
+import {Inter} from "next/font/google"
+import {ThemeProvider} from "@/components/theme-provider"
+import './globals.css'
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({subsets: ["latin"]})
 
 export const metadata: Metadata = {
-  title: "ME-Gui",
-  description: "Generate Lua scripts for API automation",
+    title: "ME-Gui",
+    description: "Generate Lua scripts for API automation",
     generator: 'v0.dev'
 }
 
 export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
+                                       children,
+                                   }: {
+    children: React.ReactNode
 }) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+    return (
+        <html lang="en" suppressHydrationWarning>
+        <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          {children}
+            {children}
         </ThemeProvider>
-      </body>
-    </html>
-  )
+        </body>
+        </html>
+    )
 }
 
 
-
-import './globals.css'
