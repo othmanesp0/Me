@@ -23,14 +23,11 @@ export function ScriptPreview({ script, onScriptChange }: ScriptPreviewProps) {
   const [editableScript, setEditableScript] = useState(script)
 
   // Apply syntax highlighting when script changes
-  useEffect(() => {
-    setHighlightedScript(highlightLuaCode(script))
-  }, [script])
+
 
   // Update editable script when script prop changes
   useEffect(() => {
     setEditableScript(script)
-    setHighlightedScript(script)
   }, [script])
 
   const copyToClipboard = () => {
