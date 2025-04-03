@@ -23,7 +23,11 @@ export function ScriptPreview({ script, onScriptChange }: ScriptPreviewProps) {
   const [editableScript, setEditableScript] = useState(script)
 
   // Apply syntax highlighting when script changes
-
+  useEffect(() => {
+    // Use Prism.js to highlight the script
+    const highlighted = highlightLuaCode(script);
+    setHighlightedScript(highlighted);
+  }, [script]);
 
   // Update editable script when script prop changes
   useEffect(() => {
@@ -206,28 +210,22 @@ export function ScriptPreview({ script, onScriptChange }: ScriptPreviewProps) {
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="relative">
-            <div className="absolute top-0 left-0 w-full h-8 bg-amber-950/70 border-b border-amber-500/30 flex items-center px-4">
-              <div className="flex space-x-2">
-                <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                <div className="w-3 h-3 rounded-full bg-green-500"></div>
-              </div>
-              <div className="mx-auto text-xs text-amber-500/70">script.lua {isEditing && "(Editing)"}</div>
-            </div>
-            <div className="mt-8 bg-amber-950/50 p-4 rounded-b-md overflow-x-auto font-mono text-sm whitespace-pre-wrap text-amber-200 border-t border-amber-500/30 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-amber-600 scrollbar-track-amber-900/30">
-              {isEditing ? (
-                <textarea
-                  value={editableScript}
-                  onChange={handleScriptChange}
-                  className="w-full h-full min-h-[300px] bg-transparent text-amber-200 font-mono text-sm resize-none focus:outline-none"
-                  spellCheck="false"
-                />
-              ) : (
-                <div dangerouslySetInnerHTML={{ __html: highlightedScript }} />
-              )}
-            </div>
-          </div>
+          {isEditing ? (
+            <textarea
+              title="Lua script editor"
+              placeholder="Edit your Lua script here"
+              className="w-full h-full min-h-[300px] p-4 font-mono text-sm bg-black/80 text-white"
+              value={editableScript}
+              onChange={handleScriptChange}
+            />
+          ) : (
+            <pre className="p-4 overflow-auto max-h-[500px] bg-black/80">
+              <code
+                className="font-mono text-sm language-lua"
+                dangerouslySetInnerHTML={{ __html: highlightedScript }}
+              />
+            </pre>
+          )}
         </CardContent>
       </Card>
     </TooltipProvider>
