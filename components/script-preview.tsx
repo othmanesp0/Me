@@ -1,27 +1,41 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Copy, Check, Download, FileCode, Play } from "lucide-react"
+import { Copy, Check, Download, FileCode, Play, Edit, Save } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip"
 import { toast } from "@/hooks/use-toast"
-
+import { highlightLuaCode } from "@/lib/syntax-highlighting"
 
 interface ScriptPreviewProps {
   script: string
+  onScriptChange?: (newScript: string) => void
 }
 
-export function ScriptPreview({ script }: ScriptPreviewProps) {
+export function ScriptPreview({ script, onScriptChange }: ScriptPreviewProps) {
   const [copied, setCopied] = useState(false)
   const [executing, setExecuting] = useState(false)
   const [highlightedScript, setHighlightedScript] = useState<string>(script)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editableScript, setEditableScript] = useState(script)
 
   // Apply syntax highlighting when script changes
+  useEffect(() => {
+    setHighlightedScript(highlightLuaCode(script))
+  }, [script])
 
+  // Update editable script when script prop changes
+  useEffect(() => {
+    setEditableScript(script)
+    setHighlightedScript(script)
+  }, [script])
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(script)
+    // Use the clean version of the script without color codes
+    navigator.clipboard.writeText(isEditing ? editableScript : script)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
 
@@ -33,7 +47,8 @@ export function ScriptPreview({ script }: ScriptPreviewProps) {
   }
 
   const downloadScript = () => {
-    const blob = new Blob([script], { type: "text/plain" })
+    // Use the clean version of the script without color codes
+    const blob = new Blob([isEditing ? editableScript : script], { type: "text/plain" })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
     a.href = url
@@ -70,6 +85,28 @@ export function ScriptPreview({ script }: ScriptPreviewProps) {
     }, 2000)
   }
 
+  const toggleEditMode = () => {
+    if (isEditing) {
+      // Save changes
+      if (onScriptChange) {
+        onScriptChange(editableScript)
+      }
+      setHighlightedScript(editableScript)
+
+      toast({
+        title: "Changes Saved",
+        description: "Your script changes have been saved",
+        variant: "success",
+      })
+    }
+
+    setIsEditing(!isEditing)
+  }
+
+  const handleScriptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setEditableScript(e.target.value)
+  }
+
   return (
     <TooltipProvider>
       <Card className="border-2 border-amber-500/50 bg-game-card shadow-glow">
@@ -79,6 +116,32 @@ export function ScriptPreview({ script }: ScriptPreviewProps) {
             Lua Script
           </CardTitle>
           <div className="flex space-x-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={toggleEditMode}
+                  className="h-8 border-blue-500/50 bg-blue-900/30 text-blue-300 hover:bg-blue-800/50"
+                >
+                  {isEditing ? (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Save
+                    </>
+                  ) : (
+                    <>
+                      <Edit className="mr-2 h-4 w-4" />
+                      Edit
+                    </>
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{isEditing ? "Save changes" : "Edit script"}</p>
+              </TooltipContent>
+            </Tooltip>
+
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
@@ -153,10 +216,19 @@ export function ScriptPreview({ script }: ScriptPreviewProps) {
                 <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
                 <div className="w-3 h-3 rounded-full bg-green-500"></div>
               </div>
-              <div className="mx-auto text-xs text-amber-500/70">script.lua</div>
+              <div className="mx-auto text-xs text-amber-500/70">script.lua {isEditing && "(Editing)"}</div>
             </div>
             <div className="mt-8 bg-amber-950/50 p-4 rounded-b-md overflow-x-auto font-mono text-sm whitespace-pre-wrap text-amber-200 border-t border-amber-500/30 max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-amber-600 scrollbar-track-amber-900/30">
-              <div dangerouslySetInnerHTML={{ __html: highlightedScript }} />
+              {isEditing ? (
+                <textarea
+                  value={editableScript}
+                  onChange={handleScriptChange}
+                  className="w-full h-full min-h-[300px] bg-transparent text-amber-200 font-mono text-sm resize-none focus:outline-none"
+                  spellCheck="false"
+                />
+              ) : (
+                <div dangerouslySetInnerHTML={{ __html: highlightedScript }} />
+              )}
             </div>
           </div>
         </CardContent>
